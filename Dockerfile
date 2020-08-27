@@ -7,11 +7,12 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
 
 # Install dependencies
 RUN apt install -y libusb-dev make git python3 python3-pip python3-tk wget pkg-config
+RUN apt install -y libusb-1.0-0 libusb-1.0-0-dev
 RUN apt install -y libpng-dev libfreetype6-dev python3-pandas
 RUN apt install -y avr-libc gcc-avr gcc-arm-none-eabi
 
 # Copy udev rules
-# COPY 99-newae.rules /etc/udev/rules.d/99-newae.rules
+COPY 99-newae.rules /etc/udev/rules.d/99-newae.rules
 
 # Download chipwhisperer
 RUN mkdir -p /opt/chipwhisperer
@@ -37,4 +38,4 @@ RUN mkdir -p /home
 RUN chmod 777 /home
 
 # Entrypoint is directly the jupyter notebook
-CMD jupyter notebook --ip=0.0.0.0 --port=8888 --allow-root --no-browser --NotebookApp.token=${TOKEN}
+CMD jupyter notebook --ip=0.0.0.0 --port=8888 --allow-root --no-browser --NotebookApp.token=${TOKEN}  
