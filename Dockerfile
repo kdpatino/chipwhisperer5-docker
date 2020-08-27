@@ -1,30 +1,32 @@
-FROM ubuntu:19.10
+FROM ubuntu:20.04
 
-RUN apt-get update
+RUN apt update
 # Avoid problem with tzdata install...
 # Sets timezone to UTC though
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
 
 # Install dependencies
-RUN apt-get install -y python3 python3-pip python3-tk wget git pkg-config libfreetype6-dev libpng-dev libusb-1.0.0 libusb-1.0.0-dev
-RUN apt-get install -y avr-libc gcc-avr gcc-arm-none-eabi
+RUN apt install -y libusb-dev make git python3 python3-pip python3-tk wget pkg-config
+RUN apt install -y libpng-dev libfreetype6-dev python3-pandas
+RUN apt install -y avr-libc gcc-avr gcc-arm-none-eabi
 
 # Copy udev rules
-COPY 99-newae.rules /etc/udev/rules.d/99-newae.rules
+# COPY 99-newae.rules /etc/udev/rules.d/99-newae.rules
 
 # Download chipwhisperer
 RUN mkdir -p /opt/chipwhisperer
-WORKDIR /opt/chipwhisperer
-RUN git clone --recursive --depth=1 https://github.com/newaetech/chipwhisperer.git
+WORKDIR /opt/Chipwhisperer5
+RUN git clone https://github.com/newaetech/chipwhisperer.git
 
-# Install chipwhisperer
-WORKDIR /opt/chipwhisperer/chipwhisperer/
-RUN pip3 install -r software/requirements.txt 
+WORKDIR /opt/Chipwhisperer5/chipwhisperer
+RUN git submodule update --init jupyter
+RUN python3 -m pip install -r jupyter/requirements.txt 
+RUN python3 -m pip install -e .
 RUN python3 setup.py develop
 
-# Install jupyter and the jupyter dependencies
-WORKDIR /opt/chipwhisperer/chipwhisperer/jupyter
-RUN pip3 install -r requirements.txt
+RUN git submodule update --init openadc
+WORKDIR /opt/Chipwhisperer5/chipwhisperer/openadc/controlsw/python
+RUN python3 -m pip install -e .
 
 # Create workspace directory (This is where we mount user data)
 RUN mkdir -p /cw_workspace
